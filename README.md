@@ -1,4 +1,4 @@
-# Financial AI Chatbot 📈
+# Financial AI Chatbot 🤖 
 
 Bu proje, Python, PyTorch ve Hugging Face teknolojileri kullanılarak geliştirilmiş, metin tabanlı bir finansal farkındalık sohbet botudur. Kullanıcılara kendi finansal alışkanlıklarını sorgulamaları için anlamlı ve düşünmeye sevk eden sorular sorar.
 
