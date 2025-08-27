@@ -1,90 +1,149 @@
-# FinChatBot: Finansal Danışman Chatbot Projesi
+# Financial AI Chatbot 📈
 
-Bu proje, Python ve doğal dil işleme teknolojilerini kullanarak geliştirilen bir finansal danışman chatbot sistemidir. Kullanıcılar, bu chatbot aracılığıyla kredi başvuru koşullarını öğrenebilir, faiz hesaplamaları yapabilir ve güncel kampanyalar hakkında bilgi alabilirler. Proje, metin tabanlı bir arayüzle çalışmakta olup gelecekte görsel arayüz entegrasyonu planlanmaktadır.
+Bu proje, Python, PyTorch ve Hugging Face teknolojileri kullanılarak geliştirilmiş, metin tabanlı bir finansal farkındalık sohbet botudur. Kullanıcılara kendi finansal alışkanlıklarını sorgulamaları için anlamlı ve düşünmeye sevk eden sorular sorar.
+
+Proje, **DenizBank İlerisi Gençlik Bootcamp** kapsamında geliştirilmiştir. LLM tabanlı doğrudan bir kampanya sorgulama aracı değil, genel finansal bilinç oluşturmayı hedefleyen bir uygulamadır. Bu nedenle, kampanyalara dair bilgiler **kesin/doğru olmayabilir**.
+
+---
 
 ## İçindekiler
 
-* [Genel Bakış](#genel-bakış)
+* [Genel Amaç](#genel-amaç)
 * [Kullanılan Teknolojiler](#kullanılan-teknolojiler)
-* [Sistem Bileşenleri](#sistem-bileşenleri)
-* [Geliştirme Aşamaları](#geliştirme-aşamaları)
-
-  * [1. Proje Dosya Yapısı](#1-proje-dosya-yapısı)
-  * [2. Model Entegrasyonu](#2-model-entegrasyonu)
-  * [3. Prompt Mimarisi ve Hafıza Sistemi](#3-prompt-mimarisi-ve-hafıza-sistemi)
-  * [4. Kullanıcı Arayüzü](#4-kullanıcı-arayüzü)
-  * [5. Testler ve Sonuçlar](#5-testler-ve-sonuçlar)
+* [Kurulum](#kurulum)
+* [Model Bilgisi](#model-bilgisi)
+* [Sistem Çıktısı Örneği](#sistem-çıktısı-örneği)
+* [Arayüz Bilgisi](#arayüz-bilgisi)
 * [Gelecek Planları](#gelecek-planları)
 
 ---
 
-## Genel Bakış
+## Genel Amaç
 
-Bu proje, DenizBank İlerisi Gençlik Bootcamp kapsamında geliştirilmiştir. Amaç, yapay zeka destekli bir sistem kullanarak finansal bilgiye kolay erişim sağlamaktır. Chatbot, hem kredi şartlarını hem de genel finansal soruları yanıtlayabilmektedir.
+Bu uygulama, kullanıcıların kişisel finans yönetimi ve harcama alışkanlıkları üzerine düşünmelerini sağlayacak şekilde sorular üreten yapay zeka destekli bir danışman sunar.
+
+---
 
 ## Kullanılan Teknolojiler
 
-* **Python 3.10**
-* **HuggingFace Transformers** (Qwen modeli)
-* **Gradio** (Arayüz)
-* **Accelerate** (GPU desteği)
-* **CUDA 12.1** (GPU ile model yükleme)
+* Python 3.10+
+* PyTorch (CUDA 12.1 destekli)
+* Hugging Face Transformers
+* Hugging Face Accelerate
+* Hugging Face Pipeline API
+* Gradio (demo arayüz)
 
-## Sistem Bileşenleri
+Model olarak:
 
-* **Chatbot Modeli:** HuggingFace'den indirilen Qwen modeli
-* **Tokenizer:** Qwen'e uygun tokenizer
-* **Prompt İşleme:** Hafıza temelli prompt oluşturma fonksiyonu
-* **UI:** TextBox girişli, minimal Gradio arayüzü
+* `microsoft/Phi-4-mini-instruct` (text-generation için)
 
-## Geliştirme Aşamaları
+---
 
-### 1. Proje Dosya Yapısı
+## Kurulum
 
+```bash
+# Google Drive'a bağlan
+from google.colab import drive
+drive.mount('/content/drive')
+
+# Proje dizini oluştur
+!mkdir -p /content/drive/MyDrive/hf-demo
+%cd /content/drive/MyDrive/hf-demo
+
+# Gerekli paketleri yükle
+!pip install --quiet torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+!pip install --quiet transformers accelerate gradio
 ```
-FinChatBot/
-|— app.py
-|— chatbot/
-|   |— rag_chain.py
-|   |— memory.py
-|— environment.yml
-|— README.md
-```
 
-### 2. Model Entegrasyonu
+---
 
-Model HuggingFace üzerinden otomatik olarak çekilir. CUDA destekli donanımlarda otomatik olarak GPU kullanımı sağlanır.
+## Model Bilgisi
 
 ```python
-model = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=torch.float16, device_map="auto")
+from transformers import pipeline
+
+generator = pipeline(
+    "text-generation",
+    model = "microsoft/Phi-4-mini-instruct",
+    torch_dtype ="auto",
+    device_map="auto"
+)
 ```
 
-### 3. Prompt Mimarisi ve Hafıza Sistemi
-
-`build_prompt()` fonksiyonu ile kullanıcı mesajlarına dayalı bir sohbet geçmişi prompt'a entegre edilir.
-
-### 4. Kullanıcı Arayüzü
-
-Gradio tabanlı olarak geliştirilmiştir. Textbox girişli, çıktılar ise dinamik olarak text alanında sunulur.
+* Model, finansal alışkanlıklar konusunda kullanıcıya sorular sorması için sistem mesajıyla başlatılır:
 
 ```python
-gr.Interface(fn=chat_function, inputs=gr.Textbox(), outputs=gr.Textbox()).launch()
+messages = [
+  {"role": "system", "content": "You are a helpful and curious AI assistant that helps users reflect on their personal financial habits. You ask thought-provoking and insightful questions to better understand them."},
+  {"role": "user", "content": "Please ask me three smart questions about my financial behavior to help me reflect and improve."}
+]
 ```
 
-### 5. Testler ve Sonuçlar
+---
 
-Model doğrulukla yanıt vermektedir. Güncel olarak kampanya bilgisi, kredi oranları gibi örnek veri setleriyle test edilmektedir.
+## Sistem Çıktısı Örneği
+
+```python
+outputs = generator(
+    messages,
+    max_new_tokens=200,
+    do_sample=True,
+    temperature=0.7,
+    return_full_text = False
+)
+
+print(outputs[0]["generated_text"])
+```
+
+Bu komut sonucunda model, kullanıcının kendi finansal kararlarını düşünmesini sağlayacak sorular üretir.
+
+---
+
+## Arayüz Bilgisi
+
+Gradio ile hazırlanmış demo:
+
+```python
+def generate_text(prompt):
+  messages = [
+    {"role": "system", "content": SYSTEM_MESSAGE},
+    {"role": "user", "content": prompt}
+  ]
+  outputs = generator(
+    messages,
+    max_new_tokens=100,
+    do_sample=True,
+    temperature=0.7,
+    return_full_text = False
+  )
+  return outputs[0]["generated_text"]
+```
+
+Arayüz:
+
+```python
+demo=gr.Interface(
+    fn=generate_text,
+    inputs = gr.Textbox(label='Enter a prompt!'),
+    outputs = gr.Textbox(label='Output'),
+    title = "Financial AI Chatbot"
+)
+
+demo.launch()
+```
+
+---
 
 ## Gelecek Planları
 
-* Gerçek veri seti ile entegrasyon (API ya da manuel input)
-* Konu tabanlı yanıt sistemleri
-* Gradio yerine React tabanlı arayüz
-* Mobil versiyon (Flutter ya da React Native)
-* Open Source GPT modelleriyle benchmark karşılaştırması
+* Hafıza sistemi ile sohbet geçmişi entegrasyonu (Langchain)
+* Görsel finans raporları üretme yeteneği
+* Daha doğru bilgiler sunmak için API veri entegrasyonu (TCMB, bankalar vb.)
+* Mobil arayüz uyarlaması (Flutter/React Native)
 
 ---
 
 > Hazırlayan: **Yusuf Ziya Demirel**
 > Proje: DenizBank İlerisi Gençlik Bootcamp
-> Yöntem: RAG tabanlı Chatbot + LLM + Hafıza destekli tasarım
+> Amaç: Finansal bilinç kazandıracak sorularla kullanıcıyı desteklemek
+> Model: `microsoft/Phi-4-mini-instruct`
