@@ -1,4 +1,3 @@
-# FinChatBot
 # FinChatBot: Finansal Danışman Chatbot Projesi
 
 Bu proje, Python ve doğal dil işleme teknolojilerini kullanarak geliştirilen bir finansal danışman chatbot sistemidir. Kullanıcılar, bu chatbot aracılığıyla kredi başvuru koşullarını öğrenebilir, faiz hesaplamaları yapabilir ve güncel kampanyalar hakkında bilgi alabilirler. Proje, metin tabanlı bir arayüzle çalışmakta olup gelecekte görsel arayüz entegrasyonu planlanmaktadır.
